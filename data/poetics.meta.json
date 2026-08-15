@@ -1,6 +1,6 @@
 {
-  "_comment": "Optional metadata for POETICS zines, keyed by period (MMYY, e.g. 0626). Fields: label (subtitle under the month), title, issue.",
-  "0626": {
+  "_comment": "Optional metadata for POETICS zines, keyed by period (MMYY = first month of the bimonthly pair, e.g. 0726 = July/August 2026). Fields: label (subtitle under the period), title, issue, period (optional caption override).",
+  "0726": {
     "label": "Issue 01",
     "issue": 1,
     "title": "POETICS Zine"

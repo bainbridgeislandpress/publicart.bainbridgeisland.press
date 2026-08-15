@@ -59,21 +59,37 @@ Optional metadata in `data/scotch-broom.meta.json` (key = `MMMYY`):
 
 ### POETICS zines (`poetics-zine/`)
 
+POETICS is published **every two months**. Issue 01 is **July/August 2026**; later issues follow the same window (September/October, November/December, January/February, …).
+
 | File | Role |
 |------|------|
 | `POETICS-Zine-{MM}{YY}.jpg` | Cover image |
 | `POETICS-Zine-{MM}{YY}.pdf` | Downloadable issue (linked from the card) |
 
-**Month:** `01`–`12` · **Year:** two digits
+**Month (`MM`):** first month of the pair — `01` `03` `05` `07` `09` `11`  
+**Year:** two digits (`26` → 2026)
+
+The gallery caption is the two-month window, e.g. `0726` → **July/August 2026**.
+
+| Issue window | Filename |
+|--------------|----------|
+| January/February | `POETICS-Zine-01YY` |
+| March/April | `POETICS-Zine-03YY` |
+| May/June | `POETICS-Zine-05YY` |
+| July/August | `POETICS-Zine-07YY` |
+| September/October | `POETICS-Zine-09YY` |
+| November/December | `POETICS-Zine-11YY` |
 
 Examples:
 
 ```
-poetics-zine/POETICS-Zine-0926.jpg
+poetics-zine/POETICS-Zine-0726.jpg   # Issue 01 — July/August 2026
+poetics-zine/POETICS-Zine-0726.pdf
+poetics-zine/POETICS-Zine-0926.jpg   # Issue 02 — September/October 2026
 poetics-zine/POETICS-Zine-0926.pdf
 ```
 
-Optional metadata in `data/poetics.meta.json` (key = `MMYY`):
+Optional metadata in `data/poetics.meta.json` (key = `MMYY`, first month of the pair):
 
 ```json
 {
@@ -84,6 +100,10 @@ Optional metadata in `data/poetics.meta.json` (key = `MMYY`):
   }
 }
 ```
+
+- `label` — subtitle under the period (defaults to `Issue NN` if `issue` is set)
+- `title` — used in image `alt` text
+- `period` — optional caption override (otherwise derived from the filename month)
 
 ## Build script
 
@@ -106,3 +126,5 @@ Hand-edit project descriptions and shared layout freely; keep those comment mark
 ## GitHub Action
 
 `.github/workflows/update-galleries.yml` runs on pushes to `main` that touch `scotch-broom/`, `poetics-zine/`, `data/`, or the build script. It runs the script and commits any HTML changes.
+
+POETICS filenames use the first month of each two-month window (`0726` = July/August 2026). The Action’s build script turns that into the gallery caption, so a new `POETICS-Zine-0926` pair will show as **September/October 2026**.

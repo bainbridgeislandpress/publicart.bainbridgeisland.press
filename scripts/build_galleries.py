@@ -17,18 +17,20 @@ Scotch Broom (scotch-broom/):
   YY  = two-digit year
   When multiple versions share a month, the highest -vN wins.
 
-POETICS zines (poetics-zine/):
+POETICS zines (poetics-zine/) — bimonthly:
   POETICS-Zine-{MM}{YY}.{jpg|pdf}
 
   Examples:
-    poetics-zine/POETICS-Zine-0626.jpg
-    poetics-zine/POETICS-Zine-0626.pdf
+    poetics-zine/POETICS-Zine-0726.jpg   # July/August 2026 (Issue 01)
+    poetics-zine/POETICS-Zine-0926.pdf   # September/October 2026 (Issue 02)
 
-  MM = 01–12, YY = two-digit year
+  MM = first month of the pair (01, 03, 05, 07, 09, 11)
+  YY = two-digit year
+  Display label is "{Start}/{End} {Year}", e.g. July/August 2026.
 
 Optional metadata (artist, title, issue label) lives in:
   data/scotch-broom.meta.json   keys: MMMYY (e.g. "AUG26")
-  data/poetics.meta.json        keys: MMYY  (e.g. "0626")
+  data/poetics.meta.json        keys: MMYY  (e.g. "0726")
 
 HTML markers replaced by this script:
   index.html
@@ -75,7 +77,11 @@ SB_PDF_RE = re.compile(
     r"(?P<yy>\d{2})\.pdf$",
     re.IGNORECASE,
 )
-# POETICS-Zine-0626.jpg | POETICS-Zine-0626.pdf
+# Odd months are the first month of each bimonthly pair.
+POETICS_PERIOD_MONTHS = 2
+POETICS_START_MONTHS = (1, 3, 5, 7, 9, 11)
+
+# POETICS-Zine-0726.jpg | POETICS-Zine-0926.pdf
 POETICS_RE = re.compile(
     r"^POETICS-Zine-(?P<mm>\d{2})(?P<yy>\d{2})\.(?P<ext>jpe?g|png|pdf)$",
     re.IGNORECASE,
@@ -85,10 +91,12 @@ POETICS_RE = re.compile(
 @dataclass
 class Issue:
     """A single published issue (one month / one zine)."""
-    key: str  # e.g. AUG26 or 0626
+    key: str  # e.g. AUG26 or 0726
     year: int
     month: int
     version: int = 0
+    # Number of calendar months this issue covers (1 = monthly, 2 = bimonthly).
+    period_months: int = 1
     # Filenames only (assets live in the project directory)
     thumb: str | None = None
     fullsize: str | None = None
@@ -101,7 +109,23 @@ class Issue:
 
     @property
     def month_label(self) -> str:
-        return f"{MONTH_NAMES[self.month]} {self.year}"
+        """Caption date: 'August 2026' or 'July/August 2026' for bimonthly zines."""
+        if self.meta.get("period"):
+            return str(self.meta["period"])
+
+        start_name = MONTH_NAMES[self.month]
+        if self.period_months <= 1:
+            return f"{start_name} {self.year}"
+
+        end_month = self.month + self.period_months - 1
+        end_year = self.year
+        if end_month > 12:
+            end_month -= 12
+            end_year += 1
+        end_name = MONTH_NAMES[end_month]
+        if end_year == self.year:
+            return f"{start_name}/{end_name} {self.year}"
+        return f"{start_name} {self.year}/{end_name} {end_year}"
 
     @property
     def display_label(self) -> str:
@@ -228,6 +252,13 @@ def discover_poetics(project_dir: Path, meta: dict) -> list[Issue]:
         if month < 1 or month > 12:
             print(f"warning: skipping {path.name} (invalid month {mm})", file=sys.stderr)
             continue
+        if month not in POETICS_START_MONTHS:
+            print(
+                f"warning: {path.name} uses month {mm}; POETICS issues are bimonthly. "
+                "Use the first month of the pair (01, 03, 05, 07, 09, 11). "
+                f"This file will display as a pair starting in {MONTH_NAMES[month]}.",
+                file=sys.stderr,
+            )
 
         key = f"{mm}{yy}"
         year = year_from_yy(yy)
@@ -238,6 +269,7 @@ def discover_poetics(project_dir: Path, meta: dict) -> list[Issue]:
                 key=key,
                 year=year,
                 month=month,
+                period_months=POETICS_PERIOD_MONTHS,
                 meta=meta.get(key, {}),
             )
         issue = by_key[key]
