@@ -414,6 +414,7 @@ a:hover {
 }
 
 .item-caption .month {
+  display: block;
   font-family: "EB Garamond", Georgia, serif;
   font-size: 1.15rem;
   font-weight: 500;

@@ -1,5 +1,10 @@
 {
   "_comment": "Optional metadata for Scotch Broom broadsides, keyed by period (MMYY, e.g. 0926). Fields: artist, title, label (subtitle under the month).",
+  "0926": {
+    "artist": "Makaela Smith",
+    "title": "A Letter to the Rain",
+    "label": "Makaela Smith"
+  },
   "0826": {
     "artist": "Tamarah Rockwood",
     "title": "The Sex Lives of Trees",
