@@ -1,8 +1,9 @@
 name: Update galleries
 
 # Rebuilds gallery HTML from project assets.
-# Scotch Broom is monthly (SBPoster-MMMYY). POETICS is bimonthly:
-# filename month is the first month of the pair (0726 = July/August 2026).
+# Both projects name files by MMYY. Scotch Broom is monthly
+# (ScotchBroom-0926 = September 2026). POETICS is bimonthly: the filename
+# month is the first month of the pair (POETICS-Zine-0726 = July/August 2026).
 
 on:
   # Rebuild whenever project assets or metadata change

@@ -26,27 +26,29 @@ python3 scripts/build_galleries.py
 
 | File | Role |
 |------|------|
-| `SBPoster-{MMM}{YY}.jpg` | Gallery thumbnail (recommended) |
-| `SBPoster-{MMM}{YY}.png` | Full-size image (linked from the card) |
-| `SBPoster-{MMM}{YY}-v{N}.jpg` / `.png` | Versioned revision (highest `vN` wins) |
-| `ScotchBroom-{MMM}{YY}.pdf` | Optional PDF download |
+| `ScotchBroom-{MM}{YY}.jpg` | Gallery thumbnail (recommended) |
+| `ScotchBroom-{MM}{YY}.png` | Full-size image (linked from the card) |
+| `ScotchBroom-{MM}{YY}-v{N}.jpg` / `.png` | Versioned revision (highest `vN` wins) |
+| `ScotchBroom-{MM}{YY}.pdf` | Optional PDF download |
 
-**Month codes:** `JAN` `FEB` `MAR` `APR` `MAY` `JUN` `JUL` `AUG` `SEP` `OCT` `NOV` `DEC`  
-**Year:** two digits (`26` → 2026)
+**Month (`MM`):** two digits, `01`–`12`  
+**Year (`YY`):** two digits (`26` → 2026)
+
+An issue needs a `.jpg` or `.png` to appear in the gallery; a PDF on its own is skipped with a warning.
 
 Examples:
 
 ```
-scotch-broom/SBPoster-SEP26.jpg
-scotch-broom/SBPoster-SEP26.png
-scotch-broom/ScotchBroom-SEP26.pdf
+scotch-broom/ScotchBroom-0926.jpg   # September 2026
+scotch-broom/ScotchBroom-0926.png
+scotch-broom/ScotchBroom-0926.pdf
 ```
 
-Optional metadata in `data/scotch-broom.meta.json` (key = `MMMYY`):
+Optional metadata in `data/scotch-broom.meta.json` (key = `MMYY`):
 
 ```json
 {
-  "SEP26": {
+  "0926": {
     "artist": "Poet Name",
     "title": "Poem Title",
     "label": "Poet Name"

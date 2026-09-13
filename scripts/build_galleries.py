@@ -5,17 +5,18 @@ Scan project directories for new issues and rebuild gallery HTML.
 Naming conventions
 ------------------
 Scotch Broom (scotch-broom/):
-  SBPoster-{MMM}{YY}[-v{N}].{jpg|png}
-  ScotchBroom-{MMM}{YY}.pdf          (optional download)
+  ScotchBroom-{MM}{YY}[-v{N}].{jpg|png|pdf}
 
   Examples:
-    scotch-broom/SBPoster-AUG26.jpg
-    scotch-broom/SBPoster-AUG26-v2.png
-    scotch-broom/ScotchBroom-AUG26.pdf
+    scotch-broom/ScotchBroom-0926.jpg    # September 2026 thumbnail
+    scotch-broom/ScotchBroom-0926.png    # full-size image
+    scotch-broom/ScotchBroom-0926.pdf    # optional download
+    scotch-broom/ScotchBroom-0926-v2.png # revised image
 
-  MMM = JAN FEB MAR APR MAY JUN JUL AUG SEP OCT NOV DEC
-  YY  = two-digit year
-  When multiple versions share a month, the highest -vN wins.
+  MM = two-digit month (01–12)
+  YY = two-digit year
+  When multiple image versions share a month, the highest -vN wins.
+  An issue needs a jpg or png to appear; a PDF alone is ignored.
 
 POETICS zines (poetics-zine/) — bimonthly:
   POETICS-Zine-{MM}{YY}.{jpg|pdf}
@@ -29,7 +30,7 @@ POETICS zines (poetics-zine/) — bimonthly:
   Display label is "{Start}/{End} {Year}", e.g. July/August 2026.
 
 Optional metadata (artist, title, issue label) lives in:
-  data/scotch-broom.meta.json   keys: MMMYY (e.g. "AUG26")
+  data/scotch-broom.meta.json   keys: MMYY  (e.g. "0926")
   data/poetics.meta.json        keys: MMYY  (e.g. "0726")
 
 HTML markers replaced by this script:
@@ -55,26 +56,16 @@ ROOT = Path(__file__).resolve().parent.parent
 SB_DIR = "scotch-broom"
 POETICS_DIR = "poetics-zine"
 
-MONTH_ABBR = {
-    "JAN": 1, "FEB": 2, "MAR": 3, "APR": 4, "MAY": 5, "JUN": 6,
-    "JUL": 7, "AUG": 8, "SEP": 9, "OCT": 10, "NOV": 11, "DEC": 12,
-}
 MONTH_NAMES = {
     1: "January", 2: "February", 3: "March", 4: "April",
     5: "May", 6: "June", 7: "July", 8: "August",
     9: "September", 10: "October", 11: "November", 12: "December",
 }
 
-# SBPoster-AUG26.jpg | SBPoster-AUG26-v2.png
-SB_IMAGE_RE = re.compile(
-    r"^SBPoster-(?P<mon>JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)"
-    r"(?P<yy>\d{2})(?:-v(?P<ver>\d+))?\.(?P<ext>jpe?g|png)$",
-    re.IGNORECASE,
-)
-# ScotchBroom-AUG26.pdf
-SB_PDF_RE = re.compile(
-    r"^ScotchBroom-(?P<mon>JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)"
-    r"(?P<yy>\d{2})\.pdf$",
+# ScotchBroom-0926.jpg | ScotchBroom-0926-v2.png | ScotchBroom-0926.pdf
+SB_RE = re.compile(
+    r"^ScotchBroom-(?P<mm>\d{2})(?P<yy>\d{2})(?:-v(?P<ver>\d+))?"
+    r"\.(?P<ext>jpe?g|png|pdf)$",
     re.IGNORECASE,
 )
 # Odd months are the first month of each bimonthly pair.
@@ -91,7 +82,7 @@ POETICS_RE = re.compile(
 @dataclass
 class Issue:
     """A single published issue (one month / one zine)."""
-    key: str  # e.g. AUG26 or 0726
+    key: str  # MMYY, e.g. 0926
     year: int
     month: int
     version: int = 0
@@ -171,51 +162,24 @@ def discover_scotch_broom(project_dir: Path, meta: dict) -> list[Issue]:
             continue
         name = path.name
 
-        m = SB_IMAGE_RE.match(name)
-        if m:
-            mon = m.group("mon").upper()
-            yy = m.group("yy")
-            ver = int(m.group("ver") or 0)
-            ext = m.group("ext").lower()
-            if ext == "jpeg":
-                ext = "jpg"
-            key = f"{mon}{yy}"
-            year = year_from_yy(yy)
-            month = MONTH_ABBR[mon]
-
-            issue = by_key.get(key)
-            if issue is None or ver > issue.version:
-                # New issue or higher version: start fresh for image fields
-                # but keep PDF if already found for this key.
-                existing_pdf = issue.pdf if issue else None
-                issue = Issue(
-                    key=key,
-                    year=year,
-                    month=month,
-                    version=ver,
-                    pdf=existing_pdf,
-                    meta=meta.get(key, {}),
-                )
-                by_key[key] = issue
-            elif ver < issue.version:
-                continue  # older version; ignore
-
-            if ext == "jpg":
-                issue.thumb = name
-            elif ext == "png":
-                # Prefer PNG as full-size; use as thumb only if no jpg yet
-                issue.fullsize = name
-                if not issue.thumb:
-                    issue.thumb = name
+        m = SB_RE.match(name)
+        if not m:
             continue
 
-        m = SB_PDF_RE.match(name)
-        if m:
-            mon = m.group("mon").upper()
-            yy = m.group("yy")
-            key = f"{mon}{yy}"
-            year = year_from_yy(yy)
-            month = MONTH_ABBR[mon]
+        mm = m.group("mm")
+        yy = m.group("yy")
+        month = int(mm)
+        if month < 1 or month > 12:
+            print(f"warning: skipping {name} (invalid month {mm})", file=sys.stderr)
+            continue
+        ver = int(m.group("ver") or 0)
+        ext = m.group("ext").lower()
+        if ext == "jpeg":
+            ext = "jpg"
+        key = f"{mm}{yy}"
+        year = year_from_yy(yy)
+
+        if ext == "pdf":
             if key not in by_key:
                 by_key[key] = Issue(
                     key=key,
@@ -224,8 +188,41 @@ def discover_scotch_broom(project_dir: Path, meta: dict) -> list[Issue]:
                     meta=meta.get(key, {}),
                 )
             by_key[key].pdf = name
+            continue
 
-    issues = [i for i in by_key.values() if i.img_src() or i.pdf]
+        issue = by_key.get(key)
+        if issue is None or not issue.img_src() or ver > issue.version:
+            # New issue or higher version: start fresh for image fields
+            # but keep PDF if already found for this key.
+            existing_pdf = issue.pdf if issue else None
+            issue = Issue(
+                key=key,
+                year=year,
+                month=month,
+                version=ver,
+                pdf=existing_pdf,
+                meta=meta.get(key, {}),
+            )
+            by_key[key] = issue
+        elif ver < issue.version:
+            continue  # older version; ignore
+
+        if ext == "jpg":
+            issue.thumb = name
+        elif ext == "png":
+            # Prefer PNG as full-size; use as thumb only if no jpg yet
+            issue.fullsize = name
+            if not issue.thumb:
+                issue.thumb = name
+
+    # A card needs an image; a PDF-only month would blank the front page.
+    for i in by_key.values():
+        if not i.img_src():
+            print(
+                f"warning: {i.key} has a PDF but no ScotchBroom-{i.key}.jpg/.png; skipping",
+                file=sys.stderr,
+            )
+    issues = [i for i in by_key.values() if i.img_src()]
     issues.sort(key=lambda i: i.sort_key, reverse=True)
     return issues
 
