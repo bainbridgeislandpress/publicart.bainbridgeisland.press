@@ -41,9 +41,9 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "chore: rebuild galleries from new posters/zines"
-          file_pattern: |
-            index.html
-            scotch-broom/index.html
-            poetics-zine/index.html
+          # Must stay on ONE line: the action parses this with `read -r -a`,
+          # which stops at the first newline (a YAML block scalar silently
+          # drops every pattern after the first).
+          file_pattern: "index.html scotch-broom/index.html poetics-zine/index.html"
           commit_user_name: github-actions[bot]
           commit_user_email: github-actions[bot]@users.noreply.github.com
