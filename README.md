@@ -26,21 +26,19 @@ python3 scripts/build_galleries.py
 
 | File | Role |
 |------|------|
-| `ScotchBroom-{MM}{YY}.jpg` | Gallery thumbnail (recommended) |
-| `ScotchBroom-{MM}{YY}.png` | Full-size image (linked from the card) |
-| `ScotchBroom-{MM}{YY}-v{N}.jpg` / `.png` | Versioned revision (highest `vN` wins) |
+| `ScotchBroom-{MM}{YY}.png` | Gallery image and full-size link |
+| `ScotchBroom-{MM}{YY}-v{N}.png` | Versioned revision (highest `vN` wins) |
 | `ScotchBroom-{MM}{YY}.pdf` | Optional PDF download |
 
 **Month (`MM`):** two digits, `01`–`12`  
 **Year (`YY`):** two digits (`26` → 2026)
 
-An issue needs a `.jpg` or `.png` to appear in the gallery; a PDF on its own is skipped with a warning.
+An issue needs a `.png` to appear in the gallery; a PDF on its own is skipped with a warning. Don't add a `.jpg` — the build script prefers it as the thumbnail, so a stale one would hide an updated PNG.
 
 Examples:
 
 ```
-scotch-broom/ScotchBroom-0926.jpg   # September 2026
-scotch-broom/ScotchBroom-0926.png
+scotch-broom/ScotchBroom-0926.png   # September 2026
 scotch-broom/ScotchBroom-0926.pdf
 ```
 

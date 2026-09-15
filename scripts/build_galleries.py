@@ -5,18 +5,18 @@ Scan project directories for new issues and rebuild gallery HTML.
 Naming conventions
 ------------------
 Scotch Broom (scotch-broom/):
-  ScotchBroom-{MM}{YY}[-v{N}].{jpg|png|pdf}
+  ScotchBroom-{MM}{YY}[-v{N}].{png|pdf}
 
   Examples:
-    scotch-broom/ScotchBroom-0926.jpg    # September 2026 thumbnail
-    scotch-broom/ScotchBroom-0926.png    # full-size image
+    scotch-broom/ScotchBroom-0926.png    # September 2026 image
     scotch-broom/ScotchBroom-0926.pdf    # optional download
     scotch-broom/ScotchBroom-0926-v2.png # revised image
 
   MM = two-digit month (01–12)
   YY = two-digit year
   When multiple image versions share a month, the highest -vN wins.
-  An issue needs a jpg or png to appear; a PDF alone is ignored.
+  An issue needs a png to appear; a PDF alone is ignored. A jpg, if
+  present, is still used as the thumbnail.
 
 POETICS zines (poetics-zine/) — bimonthly:
   POETICS-Zine-{MM}{YY}.{jpg|pdf}
